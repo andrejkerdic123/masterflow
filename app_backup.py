@@ -49,43 +49,12 @@ def statistika(poslovi):
 # UI
 # -----------------------
 HTML = """
-<style>
-body {
-    font-family: Arial, sans-serif;
-    max-width: 1000px;
-    margin: auto;
-    padding: 20px;
-}
-
-h1, h2 {
-    color: #333;
-}
-
-input {
-    padding: 8px;
-    margin: 4px;
-}
-
-button {
-    padding: 8px 12px;
-    cursor: pointer;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-}
-
-th {
-    background: #f0f0f0;
-}
-</style>
 <h1>📋 Evidencija poslova</h1>
+
+<form method="GET">
+  <input name="q" placeholder="Pretraži klijenta">
+  <button type="submit">🔍 Traži</button>
+</form>
 
 <form method="POST" action="/add">
   Datum: <input name="datum" required>
@@ -137,13 +106,24 @@ th {
 # -----------------------
 @app.route("/")
 def index():
+
     poslovi = ucitaj_poslove()
+
+    q = request.args.get("q", "").lower()
+
+    if q:
+        poslovi = [
+            p for p in poslovi
+            if q in p[1].lower()
+        ]
+
     return render_template_string(
         HTML,
         poslovi=poslovi,
         zarada=statistika(poslovi),
         broj=len(poslovi)
     )
+    
 
 
 @app.route("/add", methods=["POST"])
